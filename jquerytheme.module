@@ -1,0 +1,75 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function jquerytheme_menu()
+{
+    $items = array();
+
+    $items['admin/config/system/jquerytheme'] = array(
+        'title' => 'jQuery theme',
+        'description' => 'Configuration for jQuery theme module',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('jquerytheme_form'),
+        'access arguments' => array('administer jquery theme'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'jquerytheme.admin.inc',
+    );
+
+    return $items;
+}
+
+function jquerytheme_js_alter(&$javascript)
+{
+
+    if (arg(0) == 'admin' || (arg(1) == 'add' && arg(2) == 'edit') || arg(0) == 'panels' || arg(0) == 'ctools') {
+        return;
+    }
+
+    global $theme_key;
+
+    $swap_themes = variable_get('themes');
+    $swap = false;
+
+    if(!empty($swap_themes)) {
+      foreach ($swap_themes as $theme) {
+        if (!empty($theme)) {
+          if ($theme_key == $theme) {
+            $swap = true;
+          }
+        }
+      }
+    }
+
+    if ($swap == true) {
+
+        $path = drupal_get_path('module', 'jquerytheme');
+
+        $jQuery_version = '1.7.2';
+        $jQuery_local = $path . '/jquery-' . $jQuery_version . '.min.js';
+        $jQuery_cdn = 'http://ajax.googleapis.com/ajax/libs/jquery/' . $jQuery_version .  '/jquery.min.js';
+
+        $javascript['misc/jquery.js']['data'] = $jQuery_local;
+        $javascript['misc/jquery.js']['version'] = $jQuery_version;
+
+        $group = $javascript['misc/jquery.js']['group'] = JS_LIBRARY;
+        $weight = $javascript['misc/jquery.js']['weight'] = -20;
+
+//        drupal_add_js('window.jQuery || document.write(\'<script type="text/javascript" src="' . $jQuery_local . '"><\/script>\')',
+//            array('type' => 'inline', 'scope' => 'header', 'group' => $group, 'every_page' => TRUE, 'weight' => $weight));
+
+    }
+}
+
+// Create permissions
+function jquerytheme_permission() {
+  return array(
+    'administer jquery theme' => array(
+      'title' => t('Administer jQuery details'),
+      'description' => t('Allow users to change jQuery version.'),
+    ),
+  );
+}
+

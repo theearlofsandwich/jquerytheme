@@ -1,0 +1,6 @@
+name = Jquery theme
+description = "Swaps jQuery version by template."
+core = 7.x
+project = "jquerytheme"
+
+configure = admin/config/system/jquerytheme
